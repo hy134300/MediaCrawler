@@ -53,6 +53,7 @@
 - **无需JS逆向**：利用保留登录态的浏览器上下文环境，通过 JS 表达式获取签名参数
 - **优势特点**：无需逆向复杂的加密算法，大幅降低技术门槛
 
+
 ## ✨ 功能特性
 | 平台   | 关键词搜索 | 指定帖子ID爬取 | 二级评论 | 指定创作者主页 | 登录态缓存 | IP代理池 | 生成评论词云图 |
 | ------ | ---------- | -------------- | -------- | -------------- | ---------- | -------- | -------------- |
@@ -66,7 +67,8 @@
 
 
 
-### 🚀 MediaCrawlerPro 重磅发布！
+<details>
+<summary>🚀 <strong>MediaCrawlerPro 重磅发布！开源不易，欢迎订阅支持</strong></summary>
 
 > 专注于学习成熟项目的架构设计，不仅仅是爬虫技术，Pro 版本的代码设计思路同样值得深入学习！
 
@@ -90,10 +92,12 @@
 
 点击查看：[MediaCrawlerPro 项目主页](https://github.com/MediaCrawlerPro) 更多介绍
 
+</details>
+
 
 ## 🚀 快速开始
 
-> 💡 **开源不易，如果这个项目对您有帮助，请给个 ⭐ Star 支持一下！**
+> 💡 **如果这个项目对您有帮助，请给个 ⭐ Star 支持一下！**
 
 ## 📋 前置依赖
 
@@ -145,6 +149,37 @@ uv run main.py --platform xhs --lt qrcode --type detail
 # 其他平台爬虫使用示例，执行下面的命令查看
 uv run main.py --help
 ```
+
+## WebUI支持
+
+<details>
+<summary>🖥️ <strong>WebUI 可视化操作界面</strong></summary>
+
+MediaCrawler 提供了基于 Web 的可视化操作界面，无需命令行也能轻松使用爬虫功能。
+
+#### 启动 WebUI 服务
+
+```shell
+# 启动 API 服务器（默认端口 8080）
+uv run uvicorn api.main:app --port 8080 --reload
+
+# 或者使用模块方式启动
+uv run python -m api.main
+```
+
+启动成功后，访问 `http://localhost:8080` 即可打开 WebUI 界面。
+
+#### WebUI 功能特性
+
+- 可视化配置爬虫参数（平台、登录方式、爬取类型等）
+- 实时查看爬虫运行状态和日志
+- 数据预览和导出
+
+#### 界面预览
+
+<img src="docs/static/images/img_8.png" alt="WebUI 界面预览">
+
+</details>
 
 <details>
 <summary>🔗 <strong>使用 Python 原生 venv 管理环境（不推荐）</strong></summary>
@@ -209,7 +244,7 @@ MediaCrawler 支持多种数据存储方式，包括 CSV、JSON、Excel、SQLite
 📖 **详细使用说明请查看：[数据存储指南](docs/data_storage_guide.md)**
 
 
-[🚀 MediaCrawlerPro 重磅发布 🚀！更多的功能，更好的架构设计！](https://github.com/MediaCrawlerPro)
+[🚀 MediaCrawlerPro 重磅发布 🚀！更多的功能，更好的架构设计！开源不易，欢迎订阅支持！](https://github.com/MediaCrawlerPro)
 
 
 ### 💬 交流群组
@@ -226,23 +261,21 @@ MediaCrawler 支持多种数据存储方式，包括 CSV、JSON、Excel、SQLite
 
 ---
 
-<p align="center">
-  <a href="https://tikhub.io/?utm_source=github.com/NanmiCoder/MediaCrawler&utm_medium=marketing_social&utm_campaign=retargeting&utm_content=carousel_ad">
-    <img style="border-radius:20px" width="500" alt="TikHub IO_Banner zh" src="docs/static/images/tikhub_banner_zh.png">
-  </a>
-</p>
+<a href="https://tikhub.io/?utm_source=github.com/NanmiCoder/MediaCrawler&utm_medium=marketing_social&utm_campaign=retargeting&utm_content=carousel_ad">
+<img width="500" src="docs/static/images/tikhub_banner_zh.png">
+<br>
+TikHub.io 提供 900+ 高稳定性数据接口，覆盖 TK、DY、XHS、Y2B、Ins、X 等 14+ 海内外主流平台，支持用户、内容、商品、评论等多维度公开数据 API，并配套 4000 万+ 已清洗结构化数据集，使用邀请码 <code>cfzyejV9</code> 注册并充值，即可额外获得 $2 赠送额度。
+</a>
 
-[TikHub](https://tikhub.io/?utm_source=github.com/NanmiCoder/MediaCrawler&utm_medium=marketing_social&utm_campaign=retargeting&utm_content=carousel_ad) 提供超过 **700 个端点**，可用于从 **14+ 个社交媒体平台** 获取与分析数据 —— 包括视频、用户、评论、商店、商品与趋势等，一站式完成所有数据访问与分析。
+---
 
-通过每日签到，可以获取免费额度。可以使用我的注册链接：[https://user.tikhub.io/users/signup?referral_code=cfzyejV9](https://user.tikhub.io/users/signup?referral_code=cfzyejV9&utm_source=github.com/NanmiCoder/MediaCrawler&utm_medium=marketing_social&utm_campaign=retargeting&utm_content=carousel_ad) 或使用邀请码：`cfzyejV9`，注册并充值即可获得 **$2 免费额度**。
-
-[TikHub](https://tikhub.io/?utm_source=github.com/NanmiCoder/MediaCrawler&utm_medium=marketing_social&utm_campaign=retargeting&utm_content=carousel_ad) 提供以下服务：
-
-- 🚀 丰富的社交媒体数据接口（TikTok、Douyin、XHS、YouTube、Instagram等）
-- 💎 每日签到免费领取额度
-- ⚡ 高成功率与高并发支持
-- 🌐 官网：[https://tikhub.io/](https://tikhub.io/?utm_source=github.com/NanmiCoder/MediaCrawler&utm_medium=marketing_social&utm_campaign=retargeting&utm_content=carousel_ad)
-- 💻 GitHub地址：[https://github.com/TikHubIO/](https://github.com/TikHubIO/)
+<a href="https://www.thordata.com/?ls=github&lk=mediacrawler">
+<img width="500" src="docs/static/images/Thordata.png">
+<br>
+Thordata：可靠且经济高效的代理服务提供商。为企业和开发者提供稳定、高效且合规的全球代理 IP 服务。立即注册，赠送1GB住宅代理免费试用和2000次serp-api调用。
+</a>
+<br>
+<a href="https://www.thordata.com/products/residential-proxies/?ls=github&lk=mediacrawler">【住宅代理】</a> | <a href="https://www.thordata.com/products/web-scraper/?ls=github&lk=mediacrawler">【serp-api】</a>
 
 
 ### 🤝 成为赞助者
