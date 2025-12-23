@@ -6,7 +6,7 @@
 # GitHub: https://github.com/NanmiCoder
 # Licensed under NON-COMMERCIAL LEARNING LICENSE 1.1
 #
-
+import os
 # 声明：本代码仅供学习和研究目的使用。使用者应遵守以下原则：
 # 1. 不得用于任何商业用途。
 # 2. 使用时应遵守目标平台的使用条款和robots.txt规则。
@@ -34,8 +34,12 @@ from playwright.async_api import Page
 from model.m_douyin import VideoUrlInfo, CreatorUrlInfo
 from tools.crawler_util import extract_url_params_to_dict
 
-douyin_sign_obj = execjs.compile(open('libs/douyin.js', encoding='utf-8-sig').read())
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+js_path = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "libs", "douyin.js"))
 
+douyin_sign_obj = execjs.compile(
+    open(js_path, encoding="utf-8-sig").read()
+)
 def get_web_id():
     """
     生成随机的webid

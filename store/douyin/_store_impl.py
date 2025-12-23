@@ -26,21 +26,23 @@ import asyncio
 import json
 import os
 import pathlib
-from typing import Dict
+from typing import Dict, Optional, Any
 
-from sqlalchemy import select
+from sqlalchemy import select, func, desc
 
 import config
 from base.base_crawler import AbstractStore
+from database.data_registry import PLATFORM_MODELS
 from database.db_session import get_session
 from database.models import DouyinAweme, DouyinAwemeComment, DyCreator
+from store.BaseStore import BaseStore
 from tools import utils, words
 from tools.async_file_writer import AsyncFileWriter
 from var import crawler_type_var
 from database.mongodb_store_base import MongoDBStoreBase
 
 
-class DouyinCsvStoreImplement(AbstractStore):
+class DouyinCsvStoreImplement(AbstractStore,BaseStore):
     def __init__(self):
         self.file_writer = AsyncFileWriter(
             crawler_type=crawler_type_var.get(),
@@ -75,6 +77,8 @@ class DouyinCsvStoreImplement(AbstractStore):
             item_type="comments"
         )
 
+
+
     async def store_creator(self, creator: Dict):
         """
         Douyin creator CSV storage implementation
@@ -90,7 +94,66 @@ class DouyinCsvStoreImplement(AbstractStore):
         )
 
 
-class DouyinDbStoreImplement(AbstractStore):
+class DouyinDbStoreImplement(AbstractStore,BaseStore):
+    def __init__(self, **kwargs):
+        _, self.normalized_columns = PLATFORM_MODELS["dy"]
+
+    async def get_paginated_list(self, *, keyword: Optional[str] = None, source_keyword: Optional[str] = None,
+                                 sort_by: str = "liked_count", page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        async with get_session() as session:
+            # 1. 定义要查询的表
+            table = DouyinAweme.__table__
+
+            # 2. 构建基础查询语句
+            #    - data_query 用于获取数据列表
+            #    - count_query 用于获取总记录数
+            data_query = select(*self.normalized_columns)
+            count_query = select(func.count()).select_from(table)
+
+            # 3. 添加筛选条件 (where)
+            where_clauses = []
+            if keyword:
+                # `keyword` 用于模糊搜索标题
+                where_clauses.append(table.c.title.like(f"%{keyword}%"))
+            if source_keyword:
+                # `source_keyword` 用于精确匹配源关键词
+                where_clauses.append(table.c.source_keyword == source_keyword)
+
+            # 如果有筛选条件，应用到两个查询上
+            if where_clauses:
+                data_query = data_query.where(*where_clauses)
+                count_query = count_query.where(*where_clauses)
+
+            # 4. 执行总数查询 (在应用分页之前！)
+            total_count_result = await session.execute(count_query)
+            total_count = total_count_result.scalar_one_or_none() or 0
+
+            if total_count == 0:
+                # 如果总数为0，没必要继续查数据，直接返回空列表
+                return {"total": 0, "list": []}
+
+            # 5. 添加排序 (order_by)
+            sort_column = next((c for c in self.normalized_columns if c.name == sort_by), None)
+            if sort_column is not None:
+                data_query = data_query.order_by(desc(sort_column))
+
+            # 6. 添加分页 (limit / offset) - 这才是分页的关键！
+            #    - offset: 跳过多少条记录
+            #    - limit:  最多取多少条记录
+            offset = (page - 1) * page_size
+            data_query = data_query.offset(offset).limit(page_size)
+
+            # 7. 执行最终的数据查询
+            data_result = await session.execute(data_query)
+
+            # 8. 组装并返回最终结果
+            data_list = [dict(row._mapping) for row in data_result.all()]
+
+            return {
+                "total": total_count,
+                "list": data_list
+            }
+
     async def store_content(self, content_item: Dict):
         """
         Douyin content DB storage implementation

@@ -27,7 +27,7 @@ class KuaiShouGraphQL:
     graphql_queries: Dict[str, str]= {}
 
     def __init__(self):
-        self.graphql_dir = "media_platform/kuaishou/graphql/"
+        self.graphql_dir = "../media_platform/kuaishou/graphql/"
         self.load_graphql_queries()
 
     def load_graphql_queries(self):

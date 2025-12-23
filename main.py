@@ -39,13 +39,21 @@ from var import crawler_type_var
 
 
 class CrawlerFactory:
+    PLATFORM_NAME_MAP = {
+        "xhs": "小红书",
+        "dy": "抖音",
+        "ks": "快手",
+        "bili": "B站",
+        "wb": "微博",
+        "zhihu": "知乎",
+    }
     CRAWLERS = {
         "xhs": XiaoHongShuCrawler,
         "dy": DouYinCrawler,
         "ks": KuaishouCrawler,
         "bili": BilibiliCrawler,
         "wb": WeiboCrawler,
-        "tieba": TieBaCrawler,
+       # "tieba": TieBaCrawler,
         "zhihu": ZhihuCrawler,
     }
 
