@@ -46,6 +46,7 @@ class BilibiliVideo(Base):
     video_comment = Column(Text)
     video_cover_url = Column(Text)
     source_keyword = Column(Text, default='')
+    asset_status = Column(Text, default='PENDING')
 
 class BilibiliVideoComment(Base):
     __tablename__ = 'bilibili_video_comment'
@@ -64,6 +65,7 @@ class BilibiliVideoComment(Base):
     sub_comment_count = Column(Text)
     parent_comment_id = Column(String(255))
     like_count = Column(Text, default='0')
+
 
 class BilibiliUpInfo(Base):
     __tablename__ = 'bilibili_up_info'
@@ -137,6 +139,7 @@ class DouyinAweme(Base):
     music_download_url = Column(Text)
     note_download_url = Column(Text)
     source_keyword = Column(Text, default='')
+    asset_status = Column(Text, default='PENDING')
 
 class DouyinAwemeComment(Base):
     __tablename__ = 'douyin_aweme_comment'
@@ -176,6 +179,65 @@ class DyCreator(Base):
     interaction = Column(Text)
     videos_count = Column(String(255))
 
+class TiktokVideo(Base):
+    __tablename__ = 'tiktok_video'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(255))
+    user_unique_id = Column(String(255))
+    nickname = Column(Text)
+    avatar = Column(Text)
+    user_signature = Column(Text)
+    ip_location = Column(Text)
+    add_ts = Column(BigInteger)
+    last_modify_ts = Column(BigInteger)
+    video_id = Column(BigInteger, index=True)
+    title = Column(Text)
+    desc = Column(Text)
+    create_time = Column(BigInteger, index=True)
+    liked_count = Column(Text)
+    comment_count = Column(Text)
+    share_count = Column(Text)
+    collected_count = Column(Text)
+    video_url = Column(Text)
+    cover_url = Column(Text)
+    video_download_url = Column(Text)
+    music_download_url = Column(Text)
+    source_keyword = Column(Text, default='')
+    asset_status = Column(Text, default='PENDING')
+
+class TiktokVideoComment(Base):
+    __tablename__ = 'tiktok_video_comment'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(255))
+    nickname = Column(Text)
+    avatar = Column(Text)
+    add_ts = Column(BigInteger)
+    last_modify_ts = Column(BigInteger)
+    comment_id = Column(BigInteger, index=True)
+    video_id = Column(BigInteger, index=True)
+    content = Column(Text)
+    create_time = Column(BigInteger)
+    sub_comment_count = Column(Text)
+    parent_comment_id = Column(String(255))
+    like_count = Column(Text, default='0')
+
+class TiktokCreator(Base):
+    __tablename__ = 'tiktok_creator'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(255))
+    unique_id = Column(String(255))
+    nickname = Column(Text)
+    avatar = Column(Text)
+    ip_location = Column(Text)
+    add_ts = Column(BigInteger)
+    last_modify_ts = Column(BigInteger)
+    desc = Column(Text)
+    gender = Column(Text)
+    follows = Column(Text)
+    fans = Column(Text)
+    interaction = Column(Text)
+    videos_count = Column(String(255))
+
 class KuaishouVideo(Base):
     __tablename__ = 'kuaishou_video'
     id = Column(Integer, primary_key=True)
@@ -195,6 +257,7 @@ class KuaishouVideo(Base):
     video_cover_url = Column(Text)
     video_play_url = Column(Text)
     source_keyword = Column(Text, default='')
+    asset_status = Column(Text, default='PENDING')
 
 class KuaishouVideoComment(Base):
     __tablename__ = 'kuaishou_video_comment'
@@ -307,6 +370,7 @@ class XhsNote(Base):
     note_url = Column(Text)
     source_keyword = Column(Text, default='')
     xsec_token = Column(Text)
+    asset_status = Column(Text, default='PENDING')
 
 class XhsNoteComment(Base):
     __tablename__ = 'xhs_note_comment'

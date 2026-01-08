@@ -12,6 +12,7 @@ from store.BaseStore import BaseStore
 from store.bilibili import BiliDbStoreImplement
 from store.douyin._store_impl import DouyinDbStoreImplement
 from store.kuaishou import KuaishouDbStoreImplement
+from store.tiktok import TiktokDbStoreImplement
 from store.weibo import WeiboDbStoreImplement
 from store.xhs._store_impl import XhsDbStoreImplement
 from store.zhihu import ZhihuDbStoreImplement
@@ -23,6 +24,7 @@ from store.zhihu import ZhihuDbStoreImplement
 STORE_REGISTRY: Dict[str, BaseStore] = {
     "xhs": XhsDbStoreImplement(),
     "dy": DouyinDbStoreImplement(),
+    "tt": TiktokDbStoreImplement(),
     "bili": BiliDbStoreImplement(),
     "ks": KuaishouDbStoreImplement(),
     "wb": WeiboDbStoreImplement(),
@@ -108,7 +110,7 @@ async def get_paginated_data_list(
 async def get_distinct_keywords() -> List[Dict[str, Any]]:
     # 1. 定义对应的平台 Key (顺序必须与 KEYWORD_TABLES 一致!)
     # xhs, dy, bili, ks, wb, tieba, zhihu
-    platform_keys = ["xhs", "dy", "bili", "ks", "wb", "tieba", "zhihu"]
+    platform_keys = ["xhs", "dy", "tt", "bili", "ks", "wb", "tieba", "zhihu"]
 
     queries = []
 

@@ -27,7 +27,7 @@ import csv
 import json
 import os
 import pathlib
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 
 import aiofiles
 from sqlalchemy import select, func, desc
@@ -100,6 +100,13 @@ class WeiboCsvStoreImplement(AbstractStore):
 
 
 class WeiboDbStoreImplement(AbstractStore,BaseStore):
+
+    async def update_asset_status(self, *, item_id: str, status: str, stored_urls: Optional[List[str]] = None,
+                                  error_msg: Optional[str] = None) -> None:
+        pass
+
+    async def list_pending_assets(self, limit: int = 50) -> List[Dict[str, Any]]:
+        pass
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

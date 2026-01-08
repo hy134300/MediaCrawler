@@ -1,14 +1,16 @@
-from typing import Dict
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
 import config
+from api.schemas import PlatformEnum
 # 这是一个关键的导入
 # 这行代码假设您是从项目根目录（MediaCrawler/）
 # 运行 uvicorn (例如: uvicorn web.api_server:app)
 # 并且根目录在 Python 的搜索路径 (sys.path) 中
 from main import CrawlerFactory
 from tools import utils
+from web.run_media_asset_worker import run_upload
 
 
 class CrawlerConfig(BaseModel):
@@ -55,7 +57,8 @@ class CrawlerConfig(BaseModel):
     STOP_WORDS_FILE: str = Field(default=config.STOP_WORDS_FILE)
     FONT_PATH: str = Field(default=config.FONT_PATH)
     CRAWLER_MAX_SLEEP_SEC: int = Field(default=config.CRAWLER_MAX_SLEEP_SEC)
-
+    specified_id_list: List[str] = Field(default_factory=list)
+    creator_id_list: List[str] = Field(default_factory=list)
     # 允许 Pydantic 模型接受未在上面定义的额外字段（如果有的话）
     class Config:
         extra = 'allow'
@@ -77,6 +80,34 @@ async def run_crawler_task(task_config: CrawlerConfig):
 
     utils.logger.info(f"[API_TASK] 配置更新完毕, 将使用 {config.SAVE_DATA_OPTION} 保存数据")
 
+    specified_id_list = task_config.specified_id_list or []
+    creator_id_list = task_config.creator_id_list or []
+    platform = PlatformEnum(task_config.PLATFORM)
+
+    if specified_id_list:
+        if platform == PlatformEnum.XHS:
+            config.XHS_SPECIFIED_NOTE_URL_LIST = specified_id_list
+        elif platform == PlatformEnum.BILIBILI:
+            config.BILI_SPECIFIED_ID_LIST = specified_id_list
+        elif platform == PlatformEnum.DOUYIN:
+            config.DY_SPECIFIED_ID_LIST = specified_id_list
+        elif platform == PlatformEnum.WEIBO:
+            config.WEIBO_SPECIFIED_ID_LIST = specified_id_list
+        elif platform == PlatformEnum.KUAISHOU:
+            config.KS_SPECIFIED_ID_LIST = specified_id_list
+
+    if creator_id_list:
+        if platform == PlatformEnum.XHS:
+            config.XHS_CREATOR_ID_LIST = creator_id_list
+        elif platform == PlatformEnum.BILIBILI:
+            config.BILI_CREATOR_ID_LIST = creator_id_list
+        elif platform == PlatformEnum.DOUYIN:
+            config.DY_CREATOR_ID_LIST = creator_id_list
+        elif platform == PlatformEnum.WEIBO:
+            config.WEIBO_CREATOR_ID_LIST = creator_id_list
+        elif platform == PlatformEnum.KUAISHOU:
+            config.KS_CREATOR_ID_LIST = creator_id_list
+
     # 2. 初始化爬虫
     utils.logger.info("[API_TASK] 准备启动爬虫...")
     crawler = CrawlerFactory.create_crawler(platform=config.PLATFORM)
@@ -84,6 +115,4 @@ async def run_crawler_task(task_config: CrawlerConfig):
     # 3. 启动爬虫
     # await crawler.start() 会阻塞在这里，如果失败，异常将向上抛出
     await crawler.start()
-
     utils.logger.info(f"[API_TASK] 爬虫任务执行成功: {task_config.PLATFORM}")
-

@@ -21,6 +21,7 @@
 # @Desc    : 小红书存储实现类
 import json
 import os
+import time
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
@@ -107,6 +108,67 @@ class XhsJsonStoreImplement(AbstractStore):
 
 
 class XhsDbStoreImplement(AbstractStore,BaseStore):
+    async def list_pending_assets(self, limit: int = 50) -> List[Dict[str, Any]]:
+        async with get_session() as session:
+            stmt = (
+                select(
+                    XhsNote.id,
+                    XhsNote.note_id.label("content_id"),
+                    XhsNote.video_url,
+                    XhsNote.image_list
+                )
+                .where("PENDING" == XhsNote.asset_status)
+                .limit(limit)
+            )
+
+            result = await session.execute(stmt)
+            rows = result.all()
+
+            items = []
+            for row in rows:
+                media_urls = []
+
+                if row.video_url:
+                    media_urls.append(row.video_url)
+
+                if row.image_list:
+                    try:
+                        media_urls.extend(json.loads(row.image_list))
+                    except Exception:
+                        pass
+
+                if not media_urls:
+                    continue
+
+                items.append({
+                    "id": row.id,
+                    "platform": "xhs",
+                    "content_id": row.content_id,
+                    "media_type": "video" if row.video_url else "image",
+                    "media_urls": media_urls
+                })
+
+            return items
+
+    async def update_asset_status(self, *, item_id: str, status: str, stored_urls: Optional[List[str]] = None,
+                                  error_msg: Optional[str] = None) -> None:
+        async with get_session() as session:
+            values = {
+                "asset_status": status,
+                "asset_ts": int(time.time()),
+                "last_modify_ts": int(time.time())
+            }
+
+            if stored_urls is not None:
+                values["stored_urls"] = json.dumps(stored_urls)
+
+            if error_msg:
+                values["asset_error"] = error_msg[:500]
+
+            stmt = update(XhsNote).where(item_id == XhsNote.id).values(**values)
+            await session.execute(stmt)
+            await session.commit()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         _, self.normalized_columns = PLATFORM_MODELS["xhs"]
@@ -122,17 +184,12 @@ class XhsDbStoreImplement(AbstractStore,BaseStore):
                 await self.add_content(session, content_item)
 
     async def get_paginated_list(self, *, keyword: Optional[str] = None, source_keyword: Optional[str] = None,
-                                 sort_by: str = "liked_count", page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+                                 sort_by: str = "add_ts", page: int = 1, page_size: int = 10) -> Dict[str, Any]:
         async with get_session() as session:
             # 1. 定义要查询的表
             table = XhsNote.__table__
-
-            # 2. 构建基础查询语句
-            #    - data_query 用于获取数据列表
-            #    - count_query 用于获取总记录数
             data_query = select(*self.normalized_columns)
             count_query = select(func.count()).select_from(table)
-
             # 3. 添加筛选条件 (where)
             where_clauses = []
             if keyword:
@@ -141,6 +198,8 @@ class XhsDbStoreImplement(AbstractStore,BaseStore):
             if source_keyword:
                 # `source_keyword` 用于精确匹配源关键词
                 where_clauses.append(table.c.source_keyword == source_keyword)
+            else:
+                where_clauses.append(table.c.source_keyword == '')
 
             # 如果有筛选条件，应用到两个查询上
             if where_clauses:

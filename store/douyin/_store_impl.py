@@ -26,9 +26,10 @@ import asyncio
 import json
 import os
 import pathlib
-from typing import Dict, Optional, Any
+import time
+from typing import Dict, Optional, Any, List
 
-from sqlalchemy import select, func, desc
+from sqlalchemy import select, func, desc, update
 
 import config
 from base.base_crawler import AbstractStore
@@ -98,6 +99,54 @@ class DouyinDbStoreImplement(AbstractStore,BaseStore):
     def __init__(self, **kwargs):
         _, self.normalized_columns = PLATFORM_MODELS["dy"]
 
+    async def list_pending_assets(self, limit: int = 50) -> List[Dict[str, Any]]:
+        async with get_session() as session:
+            stmt = (
+                select(
+                    DouyinAweme.id,
+                    DouyinAweme.cover_url,
+                    DouyinAweme.video_download_url,
+                    DouyinAweme.note_download_url
+                )
+                .where("PENDING" == DouyinAweme.asset_status)
+                .limit(limit)
+            )
+
+            result = await session.execute(stmt)
+            rows = result.all()
+
+            items = []
+            for row in rows:
+                media_fields = {
+                    "cover_url": row.cover_url,
+                    "video_download_url": row.video_download_url,
+                    "note_download_url": row.note_download_url,
+                }
+
+                # 过滤掉空值
+                media_fields = {k: v for k, v in media_fields.items() if v}
+
+                if not media_fields:
+                    continue
+
+                items.append({
+                    "id": row.id,
+                    "platform": "dy",
+                    "media_fields": media_fields
+                })
+
+            return items
+
+    async def update_asset_status(self, item_id: int, new_fields: dict):
+        async with get_session() as session:
+            stmt = (
+                update(DouyinAweme)
+                .where(item_id == DouyinAweme.id)
+                .values(**new_fields)
+            )
+            await session.execute(stmt)
+            await session.commit()
+
     async def get_paginated_list(self, *, keyword: Optional[str] = None, source_keyword: Optional[str] = None,
                                  sort_by: str = "liked_count", page: int = 1, page_size: int = 10) -> Dict[str, Any]:
         async with get_session() as session:
@@ -118,6 +167,8 @@ class DouyinDbStoreImplement(AbstractStore,BaseStore):
             if source_keyword:
                 # `source_keyword` 用于精确匹配源关键词
                 where_clauses.append(table.c.source_keyword == source_keyword)
+            else:
+                where_clauses.append(table.c.source_keyword == '')
 
             # 如果有筛选条件，应用到两个查询上
             if where_clauses:

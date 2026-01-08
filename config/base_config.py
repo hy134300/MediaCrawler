@@ -18,7 +18,7 @@
 # 使用本代码即表示您同意遵守上述原则和LICENSE中的所有条款。
 
 # 基础配置
-PLATFORM = "xhs"  # 平台，xhs | dy | ks | bili | wb | tieba | zhihu
+PLATFORM = "xhs"  # 平台，xhs | dy | ks | bili | wb | tieba | zhihu | tt
 KEYWORDS = "编程副业,编程兼职"  # 关键词搜索配置，以英文逗号分隔
 LOGIN_TYPE = "qrcode"  # qrcode or phone or cookie
 COOKIES = ""
@@ -120,6 +120,7 @@ CRAWLER_MAX_SLEEP_SEC = 2
 from .bilibili_config import *
 from .xhs_config import *
 from .dy_config import *
+from .tiktok_config import *
 from .ks_config import *
 from .weibo_config import *
 from .tieba_config import *

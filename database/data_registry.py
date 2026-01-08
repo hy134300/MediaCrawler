@@ -4,7 +4,7 @@ import sqlalchemy
 from sqlalchemy import cast, Integer
 
 from database.models import (
-    DouyinAweme, XhsNote, BilibiliVideo, KuaishouVideo,
+    DouyinAweme, XhsNote, BilibiliVideo, KuaishouVideo, TiktokVideo,
     WeiboNote, TiebaNote, ZhihuContent
 )
 
@@ -25,7 +25,10 @@ PLATFORM_MODELS = {
             XhsNote.time.label("create_time"),
             XhsNote.note_url.label("note_url"),
             XhsNote.image_list.label("image_list"),
-            XhsNote.source_keyword.label("keyword")
+            XhsNote.source_keyword.label("keyword"),
+            XhsNote.add_ts.label("add_ts"),
+            XhsNote.video_url.label("video_url"),
+            XhsNote.desc.label("desc"),
         ]
     ),
 
@@ -41,7 +44,24 @@ PLATFORM_MODELS = {
             DouyinAweme.create_time.label("create_time"),
             DouyinAweme.aweme_url.label("note_url"),
             DouyinAweme.cover_url.label("image_list"),
+            DouyinAweme.video_download_url.label("video_url"),
             DouyinAweme.source_keyword.label("keyword")
+        ]
+    ),
+
+    "tt": (
+        TiktokVideo,
+        [
+            TiktokVideo.video_id.label("id"),
+            sqlalchemy.literal("tt").label("platform"),
+            TiktokVideo.title.label("title"),
+            TiktokVideo.nickname.label("nickname"),
+            TiktokVideo.liked_count.label("liked_count"),
+            TiktokVideo.comment_count.label("comment_count"),
+            TiktokVideo.create_time.label("create_time"),
+            TiktokVideo.video_url.label("note_url"),
+            TiktokVideo.cover_url.label("image_list"),
+            TiktokVideo.source_keyword.label("keyword")
         ]
     ),
 
@@ -131,6 +151,7 @@ PLATFORM_MODELS = {
 KEYWORD_TABLES = [
     XhsNote.source_keyword,
     DouyinAweme.source_keyword,
+    TiktokVideo.source_keyword,
     BilibiliVideo.source_keyword,
     KuaishouVideo.source_keyword,
     WeiboNote.source_keyword,

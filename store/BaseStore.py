@@ -1,7 +1,7 @@
 # file: store/base.py
 
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 
 class BaseStore(ABC):
@@ -30,7 +30,20 @@ class BaseStore(ABC):
         """
         pass
 
-    # 你可以根据需要添加其他通用接口，例如:
-    # @abstractmethod
-    # async def get_by_id(self, item_id: str) -> Optional[Dict[str, Any]]:
-    #     pass
+    @abstractmethod
+    async def list_pending_assets(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        查询待处理的媒体资产（统一格式）
+        用于 MediaAssetWorker
+        """
+        pass
+
+    @abstractmethod
+    async def update_asset_status(
+            self, item_id: int, new_fields: dict
+    ) -> None:
+        """
+        更新媒体资产状态
+        """
+        pass
+

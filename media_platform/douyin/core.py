@@ -38,6 +38,7 @@ from store import douyin as douyin_store
 from tools import utils
 from tools.cdp_browser import CDPBrowserManager
 from var import crawler_type_var, source_keyword_var
+from .DouyinBrowserClient import DouyinBrowserClient
 
 from .client import DouYinClient
 from .exception import DataFetchError
@@ -268,28 +269,75 @@ class DouYinCrawler(AbstractCrawler):
                 utils.logger.error(f"[DouYinCrawler.get_creators_and_videos] Failed to parse creator URL: {e}")
                 continue
 
-            creator_info: Dict = await self.dy_client.get_user_info(user_id)
-            if creator_info:
-                await douyin_store.save_creator(user_id, creator=creator_info)
+            # creator_info: Dict = await self.dy_client.get_user_info(user_id)
+            # if creator_info:
+            #     await douyin_store.save_creator(user_id, creator=creator_info)
+            #
+            # # Get all video information of the creator
+            # all_video_list = await self.dy_client.get_all_user_aweme_posts(sec_user_id=user_id, callback=self.fetch_creator_video_detail)
+            async with async_playwright() as p:
+                context = await p.chromium.launch_persistent_context(
+                    user_data_dir="./chrome-profile-douyin",
+                    executable_path="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                    headless=False,
+                    locale="zh-CN",
+                    viewport={"width": 1280, "height": 800},
+                    args=[
+                        "--disable-blink-features=AutomationControlled",
+                        "--start-maximized"
+                    ]
+                )
 
-            # Get all video information of the creator
-            all_video_list = await self.dy_client.get_all_user_aweme_posts(sec_user_id=user_id, callback=self.fetch_creator_video_detail)
+                browser_client = DouyinBrowserClient(context)
+                await browser_client.open()
 
-            video_ids = [video_item.get("aweme_id") for video_item in all_video_list]
+                try:
+                    # 1️⃣ 创作者信息
+                    creator_info = await browser_client.get_user_info(user_id)
+                    await douyin_store.save_creator(user_id, creator=creator_info)
+
+                    # 2️⃣ 创作者视频列表
+                    all_video_list = await browser_client.get_all_user_aweme_posts(
+                        sec_user_id=user_id,
+                        callback=self.fetch_creator_video_detail
+                    )
+
+                finally:
+                    # ✅ 一定要确保关闭
+                    await browser_client.close()
+                    await context.close()
+
+            # 3️⃣ 后处理（建议延迟 / 限速）
+            video_ids = [v.get("aweme_id") for v in all_video_list]
             await self.batch_get_note_comments(video_ids)
 
-    async def fetch_creator_video_detail(self, video_list: List[Dict]):
+    async def fetch_creator_video_detail(self, aweme: Dict):
         """
-        Concurrently obtain the specified post list and save the data
+        BrowserClient 回调：
+        - 一次只处理一条视频
+        - 不并发
+        - 不再调用 API
         """
-        semaphore = asyncio.Semaphore(config.MAX_CONCURRENCY_NUM)
-        task_list = [self.get_aweme_detail(post_item.get("aweme_id"), semaphore) for post_item in video_list]
+        if not aweme:
+            return
 
-        note_details = await asyncio.gather(*task_list)
-        for aweme_item in note_details:
-            if aweme_item is not None:
-                await douyin_store.update_douyin_aweme(aweme_item=aweme_item)
-                await self.get_aweme_media(aweme_item=aweme_item)
+        await douyin_store.update_douyin_aweme(aweme_item=aweme)
+
+        # ⚠️ 如果 get_aweme_media 还是 API，必须限速或改成浏览器态
+        await self.get_aweme_media(aweme_item=aweme)
+
+    # async def fetch_creator_video_detail(self, video_list: List[Dict]):
+    #     """
+    #     Concurrently obtain the specified post list and save the data
+    #     """
+    #     semaphore = asyncio.Semaphore(config.MAX_CONCURRENCY_NUM)
+    #     task_list = [self.get_aweme_detail(post_item.get("aweme_id"), semaphore) for post_item in video_list]
+    #
+    #     note_details = await asyncio.gather(*task_list)
+    #     for aweme_item in note_details:
+    #         if aweme_item is not None:
+    #             await douyin_store.update_douyin_aweme(aweme_item=aweme_item)
+    #             await self.get_aweme_media(aweme_item=aweme_item)
 
     async def create_douyin_client(self, httpx_proxy: Optional[str]) -> DouYinClient:
         """Create douyin client"""

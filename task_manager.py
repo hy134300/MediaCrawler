@@ -7,6 +7,7 @@ from typing import Dict
 from fastapi import HTTPException
 from tools import utils
 from web.crawler_task import CrawlerConfig, run_crawler_task
+from web.run_media_asset_worker import run_upload
 
 # 创建一个全局的爬虫任务锁
 CRAWLER_LOCK = asyncio.Lock()
@@ -14,6 +15,7 @@ CRAWLER_LOCK = asyncio.Lock()
 # 创建一个全局字典来存储任务状态
 # 注意: 在多进程环境中 (如 Gunicorn)，应使用 Redis 或数据库代替
 CRAWLER_TASKS_STATUS: Dict[str, dict] = {}
+UPLOAD_TASKS: dict[str, asyncio.Task] = {}
 
 
 async def run_crawler_task_wrapper(task_id: str, task_config: CrawlerConfig):
@@ -28,6 +30,12 @@ async def run_crawler_task_wrapper(task_id: str, task_config: CrawlerConfig):
         await run_crawler_task(task_config)
 
         CRAWLER_TASKS_STATUS[task_id] = {"status": "success", "message": "爬取任务已成功完成！"}
+        if task_id not in UPLOAD_TASKS:
+            utils.logger.info(f"[TASK_MANAGER] 启动上传任务: {task_id}")
+
+            UPLOAD_TASKS[task_id] = asyncio.create_task(
+                run_upload(task_config.PLATFORM)
+            )
         utils.logger.info(f"[TASK_MANAGER] 任务执行成功: {task_id}")
 
     except Exception as e:

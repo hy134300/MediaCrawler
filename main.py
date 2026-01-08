@@ -28,6 +28,7 @@ from base.base_crawler import AbstractCrawler
 from media_platform.bilibili import BilibiliCrawler
 from media_platform.douyin import DouYinCrawler
 from media_platform.kuaishou import KuaishouCrawler
+from media_platform.tiktok import TikTokCrawler
 from media_platform.tieba import TieBaCrawler
 from media_platform.weibo import WeiboCrawler
 from media_platform.xhs import XiaoHongShuCrawler
@@ -40,16 +41,18 @@ class CrawlerFactory:
     PLATFORM_NAME_MAP = {
         "xhs": "小红书",
         "dy": "抖音",
+        "tt": "TikTok",
         "ks": "快手",
         "bili": "B站",
         "wb": "微博",
-        "zhihu": "知乎",
+        "zhihu": "知乎"
     }
 
 
     CRAWLERS: dict[str, Type[AbstractCrawler]] = {
         "xhs": XiaoHongShuCrawler,
         "dy": DouYinCrawler,
+        "tt": TikTokCrawler,
         "ks": KuaishouCrawler,
         "bili": BilibiliCrawler,
         "wb": WeiboCrawler,

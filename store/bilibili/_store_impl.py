@@ -27,7 +27,7 @@ import csv
 import json
 import os
 import pathlib
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 
 import aiofiles
 from sqlalchemy import select, func, desc
@@ -124,6 +124,13 @@ class BiliCsvStoreImplement(AbstractStore):
 
 
 class BiliDbStoreImplement(AbstractStore,BaseStore):
+    async def update_asset_status(self, *, item_id: str, status: str, stored_urls: Optional[List[str]] = None,
+                                  error_msg: Optional[str] = None) -> None:
+        pass
+
+    async def list_pending_assets(self, limit: int = 50) -> List[Dict[str, Any]]:
+        pass
+
     def __init__(self, **kwargs):
         _, self.normalized_columns = PLATFORM_MODELS["bili"]
     async def get_paginated_list(self, *, keyword: Optional[str] = None, source_keyword: Optional[str] = None,
