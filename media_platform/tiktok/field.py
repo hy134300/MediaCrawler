@@ -2,7 +2,7 @@
 # Copyright (c) 2025 relakkes@gmail.com
 #
 # This file is part of MediaCrawler project.
-# Repository: https://github.com/NanmiCoder/MediaCrawler/blob/main/media_platform/douyin/field.py
+# Repository: https://github.com/NanmiCoder/MediaCrawler/blob/main/media_platform/tiktok/field.py
 # GitHub: https://github.com/NanmiCoder
 # Licensed under NON-COMMERCIAL LEARNING LICENSE 1.1
 #
@@ -23,10 +23,10 @@ from enum import Enum
 
 class SearchChannelType(Enum):
     """search channel type"""
-    GENERAL = "aweme_general"  # 综合
-    VIDEO = "aweme_video_web"  # 视频
-    USER = "aweme_user_web"  # 用户
-    LIVE = "aweme_live"  # 直播
+    GENERAL = "general"
+    VIDEO = "video"
+    USER = "user"
+    LIVE = "live"
 
 
 class SearchSortType(Enum):
@@ -34,6 +34,7 @@ class SearchSortType(Enum):
     GENERAL = 0  # 综合排序
     MOST_LIKE = 1  # 最多点赞
     LATEST = 2  # 最新发布
+
 
 class PublishTimeType(Enum):
     """publish time type"""

@@ -2,7 +2,7 @@
 # Copyright (c) 2025 relakkes@gmail.com
 #
 # This file is part of MediaCrawler project.
-# Repository: https://github.com/NanmiCoder/MediaCrawler/blob/main/media_platform/douyin/__init__.py
+# Repository: https://github.com/NanmiCoder/MediaCrawler/blob/main/model/m_tiktok.py
 # GitHub: https://github.com/NanmiCoder
 # Licensed under NON-COMMERCIAL LEARNING LICENSE 1.1
 #
@@ -17,5 +17,15 @@
 # 详细许可条款请参阅项目根目录下的LICENSE文件。
 # 使用本代码即表示您同意遵守上述原则和LICENSE中的所有条款。
 
+from pydantic import BaseModel, Field
 
-from .core import DouYinCrawler
+
+class VideoUrlInfo(BaseModel):
+    """TikTok 视频URL信息"""
+    video_id: str = Field(title="video id")
+    url_type: str = Field(default="normal", title="url type: normal, short")
+
+
+class CreatorUrlInfo(BaseModel):
+    """TikTok 创作者URL信息"""
+    unique_id: str = Field(title="creator unique id")

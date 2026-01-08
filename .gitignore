@@ -179,3 +179,7 @@ agent_zone
 debug_tools
 
 database/*.db
+/browser_data
+/media_platform/douyin
+/web/chrome-profile-douyin
+/web/browser_data
